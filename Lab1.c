@@ -33,8 +33,8 @@ int main(){
     	fprintf(fp, "%f\n", (i + (1/delta_t[j])) * delta_t[j]);
       fprintf(fp, "y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta((i + 1 / delta_t[j]) * delta_t[j]));
     }
-    total_t = (double)((end_t - start_t)/ CLOCKS_PER_SEC);
-    fprintf(fp, "Tiempo que demora en CPU = %f\n", total_t);
+    total_t = end_t - start_t;
+    fprintf(fp, "Tiempo que demora en CPU = %f\n", (float)total_t/CLOCKS_PER_SEC );
 	free(y);
 
   }
