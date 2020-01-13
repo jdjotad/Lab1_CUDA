@@ -2,11 +2,13 @@
 #include<stdlib.h>
 #include<ctype.h>
 #include<math.h>
+#include<time.h>
 
 float* euler_method(int t0, int y0, float delta_t);
 float edo_original(float t);
 float edo_resuelta(float t);
 int main(){
+  FILE *fp;
   int t0;
   int y0;
   int i, j;
@@ -15,21 +17,27 @@ int main(){
   float delta_t[6] = {pow(10, -1), pow(10, -2), pow(10, -3), pow(10, -4),
                     pow(10, -5), pow(10, -6)};
   float* y;
+  clock_t start_t, end_t, total_t;
+  fp = fopen("1_a", "w");
 
   for(j = 0 ; j < 6 ; j++)
   {
-  	printf("*********************************\n");
-  	printf("Con delta = %f\n", delta_t[j]);
-  	printf("*********************************\n");
+  	fprintf(fp, "*********************************\n");
+  	fprintf(fp, "Con delta = %f\n", delta_t[j]);
+  	fprintf(fp, "*********************************\n");
+    start_t = clock();
   	y = euler_method(t0, y0, delta_t[j]);
+    end_t = clock();
   	for(i = 0 ; i <= (10 / delta_t[j])  - (1 / delta_t[j]); i++)
-	{
-		printf("%f\n", (i + (1/delta_t[j])) * delta_t[j]);
-	    printf("y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta((i + 1 / delta_t[j]) * delta_t[j]));
-	}
+    {
+    	fprintf(fp, "%f\n", (i + (1/delta_t[j])) * delta_t[j]);
+      fprintf(fp, "y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta((i + 1 / delta_t[j]) * delta_t[j]));
+    }
+    total_t = (double)(end_t - start_t)/ CLOCKS_PER_SEC;
+    fprintf(fp, "Tiempo que demora en CPU = %f\n", total_t);
 	free(y);
+
   }
-  printf("\n");
   return 0;
 }
 
