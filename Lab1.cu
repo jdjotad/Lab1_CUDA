@@ -8,18 +8,17 @@ __global__ void euler_method(	int t0, int y0, float delta_t)
 {
 	int i, j;
 	int N = int(10 / delta_t);
-	float sum;
+	float sum = 0;
 	float *y_dev;
 	// Guardar espacio en memoria GPU
 	cudaMalloc(&y_dev, sizeof(float * (N - (1 / delta_t - 1))));
-	for(i = 1 / delta_t ; i <= N ; i++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
-		sum = 0;
-		for(j = 0 ; j <= i - 1 ; j++){//Sigue en j=0 porque necesita de esos valores para calcular los siguientes
-		  sum += edo_original(j*delta_t);
-		}
-		y[i - (int) (1 / delta_t)] = y0 + (delta_t * sum);
-		}
-	return y;
+	for(j = 0 ; j <= i - 1 ; j++){
+		sum += edo_original(j*delta_t);
+	}
+	for(i = 1 / delta_t ; i <= N ; i++, j++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
+      y[i - (int) (1 / delta_t)] = y0 + (delta_t * sum);
+      sum += edo_original(j*delta_t);
+  }
 }
 
 float edo_original(float t);
@@ -36,7 +35,7 @@ int main(){
                     pow(10, -5), pow(10, -6)};
   float *y;
   clock_t start_t, end_t, total_t;
-  fp = fopen("1_a_cuda", "w");
+  fp = fopen("../1_a_cuda", "w");
 
   for(j = 0 ; j < 6 ; j++)
   {

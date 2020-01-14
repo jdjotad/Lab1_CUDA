@@ -4,21 +4,21 @@
 #include<math.h>
 #include<time.h>
 
-float* euler_method(int t0, int y0, float delta_t);
+float* euler_method(int t0, int y0, float delta_t, int N);
 float edo_original(float t);
 float edo_resuelta(float t);
 int main(){
   FILE *fp;
-  int t0;
-  int y0;
+  int t0 = 0;
+  int y0 = 4;
   int i, j;
-  t0 = 0;
-  y0 = 4;
+  int N = 0;
   float delta_t[6] = {pow(10, -1), pow(10, -2), pow(10, -3), pow(10, -4),
                     pow(10, -5), pow(10, -6)};
   float* y;
   clock_t start_t, end_t, total_t;
   fp = fopen("../1_a", "w");
+  int counter = 0;
 
   for(j = 0 ; j < 6 ; j++)
   {
@@ -26,12 +26,17 @@ int main(){
   	fprintf(fp, "Con delta = %f\n", delta_t[j]);
   	fprintf(fp, "*********************************\n");
     start_t = clock();
-  	y = euler_method(t0, y0, delta_t[j]);
+    N = 10 / delta_t[j];
+  	y = euler_method(t0, y0, delta_t[j], N);
     end_t = clock();
-  	for(i = 0 ; i <= (10 / delta_t[j])  - (1 / delta_t[j]); i++)
+  	for(i = 0 ; i <= N; i++)
     {
-    	fprintf(fp, "%f\n", (i + (1/delta_t[j])) * delta_t[j]);
-      fprintf(fp, "y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta((i + 1 / delta_t[j]) * delta_t[j]));
+    	fprintf(fp, "%f\n", (i) * delta_t[j]);
+      fprintf(fp, "y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta(i * delta_t[j]));
+      if(i == N){
+        counter++;
+        printf("Vez que paso termino de escribir n %d \n", counter);
+      }
     }
     total_t = end_t - start_t;
     fprintf(fp, "Tiempo que demora en CPU = %f\n", (float)total_t/CLOCKS_PER_SEC );
@@ -42,18 +47,14 @@ int main(){
 }
 
 
-float* euler_method(int t0, int y0, float delta_t){
-  int i = 1 / delta_t;
+float* euler_method(int t0, int y0, float delta_t, int N){
+  int i = 0;
   int j = 0;
-  int N = 10 / delta_t;
   float sum = 0;
-  float* y = (float*) malloc(sizeof(float) * N - (1 / delta_t - 1) * sizeof(float)); //Asignacion de memoria
-  for(j = 0 ; j <= i - 1 ; j++){
-    sum += edo_original(j*delta_t);
-  }
-  for(i = 1 / delta_t ; i <= N ; i++, j++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
-      y[i - (int) (1 / delta_t)] = y0 + (delta_t * sum);
+  float* y = (float*) malloc(sizeof(float) * (N + 1)); //Asignacion de memoria
+  for(i = 0 ; i <= N ; i++, j++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
       sum += edo_original(j*delta_t);
+      y[i] = y0 + (delta_t * sum);
   }
   return y;
 }
