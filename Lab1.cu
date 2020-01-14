@@ -3,69 +3,67 @@
 #include<ctype.h>
 #include<math.h>
 #include<time.h>
-
-__global__ void euler_method(	int t0, int y0, float delta_t)
+__device__ float edo_original(float t)
 {
-	int i, j;
-	int N = int(10 / delta_t);
-	float sum = 0;
-	float *y_dev;
-	// Guardar espacio en memoria GPU
-	cudaMalloc(&y_dev, sizeof(float * (N - (1 / delta_t - 1))));
-	for(j = 0 ; j <= i - 1 ; j++){
-		sum += edo_original(j*delta_t);
-	}
-	for(i = 1 / delta_t ; i <= N ; i++, j++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
-      y[i - (int) (1 / delta_t)] = y0 + (delta_t * sum);
-      sum += edo_original(j*delta_t);
-  }
+	return 9 * (powf(t, 2)) - 4 * t + 5;
 }
 
-float edo_original(float t);
+__global__ void euler_method(float *y, float delta_t, int N)
+{
+	int y0 = 4;
+	int tId = threadIdx.x + blockIdx.x*blockDim.x;
+	float sum = 0;
+	if(tId <= N){
+		for(int i = 0, j = 0; i <= tId ; i++, j++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
+				sum += edo_original(j*delta_t);
+				y[i] = y0 + (delta_t * sum);
+		}
+	}
+}
+
 float edo_resuelta(float t);
 
 int main(){
 	FILE *fp;
-	int t0;
-	int y0;
-  	int i, j;
-  t0 = 0;
-  y0 = 4;
-  float delta_t[6] = {pow(10, -1), pow(10, -2), pow(10, -3), pow(10, -4),
-                    pow(10, -5), pow(10, -6)};
-  float *y;
-  clock_t start_t, end_t, total_t;
+	int i, j, N, counter = 0;
+  float delta_t[6] = {powf(10, -1), powf(10, -2), powf(10, -3), powf(10, -4),
+                    powf(10, -5), powf(10, -6)};
+  float *y, *y_dev;
+	int block_size, grid_size;
   fp = fopen("../1_a_cuda", "w");
+
+	cudaEvent_t ct1, ct2;
+	float dt;
+	cudaEventCreate(&ct1); cudaEventCreate(&ct2);
 
   for(j = 0 ; j < 6 ; j++)
   {
   	fprintf(fp, "*********************************\n");
   	fprintf(fp, "Con delta = %f\n", delta_t[j]);
   	fprintf(fp, "*********************************\n");
-		// Guardar espacio en memoria CPU
-		y = (float*) malloc(sizeof(float * (N - (1 / delta_t - 1))));
-  	euler_method<<1,1>>(t0, y0, delta_t);
-		cudaMemcpy(y_dev, y, sizeof(sizeof(float * (N - (1 / delta_t - 1)))), cudaMemcpyDeviceToHost);
-  	for(i = 0 ; i <= (10 / delta_t[j])  - (1 / delta_t[j]); i++)
-    {
-    	fprintf(fp, "%f\n", (i + (1/delta_t[j])) * delta_t[j]);
-      fprintf(fp, "y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta((i + 1 / delta_t[j]) * delta_t[j]));
-    }
-    total_t = (double)(end_t - start_t)/ CLOCKS_PER_SEC;
-    fprintf(fp, "Tiempo que demora en CPU = %f\n", total_t);
-	free(y);
+		block_size = 256; N = 10 / delta_t[j];
+		grid_size = (int)ceil((float)(N +1 )/ block_size);
 
+		cudaMalloc(&y_dev, sizeof(float) * (N + 1));
+		y = (float*) malloc(sizeof(float) * (N + 1));
+
+		cudaEventRecord(ct1);
+  	euler_method<<<grid_size,block_size>>>(y_dev, delta_t[j], N);
+		cudaEventRecord(ct2);
+		cudaMemcpy(y, y_dev, (N + 1)*sizeof(float), cudaMemcpyDeviceToHost);
+		cudaEventSynchronize(ct2);
+		cudaEventElapsedTime(&dt, ct1, ct2);
+
+  	for(i = 0 ; i <= N; i++)
+    {
+			fprintf(fp, "%f\n", i * delta_t[j]);
+      fprintf(fp, "y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta(i * delta_t[j]));
+    }
+		counter++; printf("Tiempo que demora en GPU = %f [ms] para delta numero %d\n", dt, counter);
+		free(y);
+		cudaFree(y_dev);
   }
   return 0;
-}
-
-
-float* euler_method(int t0, int y0, float delta_t){
-}
-
-float edo_original(float t)
-{
-	return 9 * (powf(t, 2)) - 4 * t + 5;
 }
 
 float edo_resuelta(float t)

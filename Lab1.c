@@ -25,21 +25,18 @@ int main(){
   	fprintf(fp, "*********************************\n");
   	fprintf(fp, "Con delta = %f\n", delta_t[j]);
   	fprintf(fp, "*********************************\n");
-    start_t = clock();
     N = 10 / delta_t[j];
+    start_t = clock();
   	y = euler_method(t0, y0, delta_t[j], N);
     end_t = clock();
   	for(i = 0 ; i <= N; i++)
     {
     	fprintf(fp, "%f\n", (i) * delta_t[j]);
       fprintf(fp, "y[%i]=%f   ,   %f\n", i, *(y + i), edo_resuelta(i * delta_t[j]));
-      if(i == N){
-        counter++;
-        printf("Vez que paso termino de escribir n %d \n", counter);
-      }
     }
     total_t = end_t - start_t;
-    fprintf(fp, "Tiempo que demora en CPU = %f\n", (float)total_t/CLOCKS_PER_SEC );
+		counter++;
+    printf("Tiempo que demora en CPU = %f [ms] para delta numero %d\n", ((float) 1000*total_t/CLOCKS_PER_SEC), counter);
 	free(y);
 
   }
