@@ -29,10 +29,10 @@ int main(){
     start_t = clock();
   	y = euler_method(t0, y0, delta_t[j], N);
     end_t = clock();
-  	for(i = 0 ; i <= N; i++)
+  	for(i = 0 ; i < N; i++)
     {
-    	fprintf(fp, "%f\n", (i) * delta_t[j]);
-      fprintf(fp, "y[%i]=%f , %f\n", i, *(y + i), edo_resuelta(i * delta_t[j]));
+    	fprintf(fp, "t = %f\n", (i) * delta_t[j]);
+      fprintf(fp, "y[%i]=%f , %f\n", i + 1, *(y + i), edo_resuelta(i * delta_t[j]));
     }
     total_t = end_t - start_t;
 		counter++;
@@ -48,8 +48,8 @@ float* euler_method(int t0, int y0, float delta_t, int N){
   int i = 0;
   int j = 0;
   float sum = 0;
-  float* y = (float*) malloc(sizeof(float) * (N + 1)); //Asignacion de memoria
-  for(i = 0 ; i <= N ; i++, j++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
+  float* y = (float*) malloc(sizeof(float) * N); //Asignacion de memoria
+  for(i = 0 ; i < N ; i++, j++){ //Desde 1 / delta_t porque necesita empezar desde n=1, hasta n=10
       sum += edo_original(j*delta_t);
       y[i] = y0 + (delta_t * sum);
   }
