@@ -31,8 +31,8 @@ int main(){
     end_t = clock();
   	for(i = 0 ; i < N; i++)
     {
-    	fprintf(fp, "t = %f\n", (i) * delta_t[j]);
-      fprintf(fp, "y[%i]=%f , %f\n", i + 1, *(y + i), edo_resuelta(i * delta_t[j]));
+    	fprintf(fp, "t = %f\n", (i+1) * delta_t[j]);
+      fprintf(fp, "y[%i]=%f , %f\n", i + 1, *(y + i), edo_resuelta((i+1) * delta_t[j]));
     }
     total_t = end_t - start_t;
 		counter++;

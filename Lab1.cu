@@ -47,7 +47,7 @@ int main(){
 		cudaEventRecord(ct1);
   	euler_method<<<grid_size,block_size>>>(y_dev, delta_t[j], N);
 		cudaEventRecord(ct2);
-		cudaMemcpy(y, y_dev, (N + 1)*sizeof(float), cudaMemcpyDeviceToHost);
+		cudaMemcpy(y, y_dev, N *sizeof(float), cudaMemcpyDeviceToHost);
 		cudaEventSynchronize(ct2);
 		cudaEventElapsedTime(&dt, ct1, ct2);
 
@@ -56,7 +56,7 @@ int main(){
 		fprintf(fp, "*********************************\n");
   	for(i = 0 ; i < N; i++)
     {
-			fprintf(fp, "t = %f\n", i * delta_t[j]);
+			fprintf(fp, "t = %f\n", i+1 * delta_t[j]);
       fprintf(fp, "y[%i]=%f , %f\n", i + 1, *(y + i), edo_resuelta((i+1) * delta_t[j]));
     }
 		counter++; printf("Tiempo que demora en GPU = %f [ms] para delta numero %d\n", dt, counter);
