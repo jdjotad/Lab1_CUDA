@@ -18,13 +18,15 @@ float edo_original(float t);
 void sumatoria(float *sum, float delta_t, int N);
 
 int main(){
-	FILE *fp, *fp_time;
-	int i, j, N, counter = 0;
+	//FILE *fp;
+	//int i;
+	FILE *fp_time;
+	int j, N, counter = 0;
   float delta_t[6] = {powf(10, -1), powf(10, -2), powf(10, -3), powf(10, -4),
                     powf(10, -5), powf(10, -6)};
   float *y, *y_dev, *sum, *sum_dev;
 	int block_size, grid_size;
-  fp = fopen("../1_c", "w");
+  //fp = fopen("../1_c", "w");
 	fp_time = fopen("../1_c_time", "w");
 
 	cudaEvent_t ct1, ct2;
@@ -33,10 +35,6 @@ int main(){
 
   for(j = 0 ; j < 6 ; j++)
   {
-  	fprintf(fp, "*********************************\n");
-  	fprintf(fp, "Con delta = %f\n", delta_t[j]);
-  	fprintf(fp, "*********************************\n");
-
 		block_size = 256;
 		N = 10 / delta_t[j];
 		grid_size = (int)ceil((float) N / block_size);
@@ -55,13 +53,17 @@ int main(){
 		cudaMemcpy(y, y_dev, N *sizeof(float), cudaMemcpyDeviceToHost);
 		cudaEventSynchronize(ct2);
 		cudaEventElapsedTime(&dt, ct1, ct2);
-
+		/*
+		fprintf(fp, "*********************************\n");
+		fprintf(fp, "Con delta = %f\n", delta_t[j]);
+		fprintf(fp, "*********************************\n");
   	for(i = 0 ; i < N; i++)
     {
 			fprintf(fp, "t = %f\n", i+1 * delta_t[j]);
       fprintf(fp, "y[%i] = %f , %f\n", i + 1, *(y + i), edo_resuelta((i+1) * delta_t[j]));
     }
-		counter++; printf("Tiempo que demora en GPU = %f [ms] para delta numero %d\n", dt, counter);
+		*/
+		counter++; printf("Tiempo que demora en HYBRID = %f [ms] para delta numero %d\n", dt, counter);
 		fprintf(fp_time, "%f %f ",delta_t[j], dt);
 		free(y);
 		free(sum);
