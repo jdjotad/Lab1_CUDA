@@ -19,7 +19,7 @@ int main(){
   float* y;
   clock_t start_t, end_t, total_t;
   //fp = fopen("../1_a", "w");
-  fp_time = fopen("../1_a_time", "w");
+  fp_time = fopen("1_a_time", "w");
   int counter = 0;
 
   for(j = 0 ; j < 6 ; j++)

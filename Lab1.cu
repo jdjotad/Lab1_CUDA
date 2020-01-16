@@ -33,7 +33,7 @@ int main(){
   float *y, *y_dev;
 	int block_size, grid_size;
   //fp = fopen("../1_b", "w");
-	fp_time = fopen("../1_b_time", "w");
+	fp_time = fopen("1_b_time", "w");
 
 	cudaEvent_t ct1, ct2;
 	float dt;

@@ -27,7 +27,7 @@ int main(){
   float *y, *y_dev, *sum, *sum_dev;
 	int block_size, grid_size;
   //fp = fopen("../1_c", "w");
-	fp_time = fopen("../1_c_time", "w");
+	fp_time = fopen("1_c_time", "w");
 
 	cudaEvent_t ct1, ct2;
 	float dt;
