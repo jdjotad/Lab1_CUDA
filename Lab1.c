@@ -8,7 +8,7 @@ float* euler_method(int t0, int y0, float delta_t, int N);
 float edo_original(float t);
 float edo_resuelta(float t);
 int main(){
-  FILE *fp;
+  FILE *fp, *fp_time;
   int t0 = 0;
   int y0 = 4;
   int i, j;
@@ -18,6 +18,7 @@ int main(){
   float* y;
   clock_t start_t, end_t, total_t;
   fp = fopen("../1_a", "w");
+  fp_time = fopen("../1_a_time", "w");
   int counter = 0;
 
   for(j = 0 ; j < 6 ; j++)
@@ -32,11 +33,12 @@ int main(){
   	for(i = 0 ; i < N; i++)
     {
     	fprintf(fp, "t = %f\n", (i+1) * delta_t[j]);
-      fprintf(fp, "y[%i]=%f , %f\n", i + 1, *(y + i), edo_resuelta((i+1) * delta_t[j]));
+      fprintf(fp, "y[%i] = %f , %f\n", i + 1, *(y + i), edo_resuelta((i+1) * delta_t[j]));
     }
     total_t = end_t - start_t;
 		counter++;
     printf("Tiempo que demora en CPU = %f [ms] para delta numero %d\n", ((float) 1000*total_t/CLOCKS_PER_SEC), counter);
+    fprintf(fp_time, "%f %f ",delta_t[j], ((float) 1000*total_t/CLOCKS_PER_SEC));
 	free(y);
 
   }
