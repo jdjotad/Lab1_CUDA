@@ -44,9 +44,9 @@ int main(){
 		counter++;
     printf("Tiempo que demora en CPU = %f [ms] para delta numero %d\n", ((float) 1000*total_t/CLOCKS_PER_SEC), counter);
     fprintf(fp_time, "%f %f ",delta_t[j], ((float) 1000*total_t/CLOCKS_PER_SEC));
-	free(y);
-
+    free(y);
   }
+  fclose(fp_time);
   return 0;
 }
 

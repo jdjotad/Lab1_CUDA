@@ -68,6 +68,7 @@ int main(){
 		free(y);
 		cudaFree(y_dev);
   }
+	fclose(fp_time);
   return 0;
 }
 
