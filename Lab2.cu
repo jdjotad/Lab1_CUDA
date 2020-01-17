@@ -27,9 +27,10 @@ int main(){
   int j, k, counter = 0;
   int block_size, grid_size;
   float m[5] = {powf(10, 4), powf(10, 5), powf(10, 6), powf(10, 7), powf(10, 8)};
+	int block_iterate[4] = {64, 128, 256, 512};
   int N = (int) powf(10,3);
   float delta_t = powf(10,-3);
-  float time[15];
+  float time[14];
 	float t = 0;
   float dt;
 
@@ -75,17 +76,41 @@ int main(){
     */
     time[k] = (float) 1000*total_t/CLOCKS_PER_SEC;
     time[5 + k] = dt;
-    //time[10 + k] = ;
     printf("Tiempo que demora en CPU = %f [ms] para m numero %d\n", ((float) 1000*total_t/CLOCKS_PER_SEC), counter);
     printf("Tiempo que demora en GPU = %f [ms] para m numero %d\n", dt, counter);
 	  free(y);
     cudaFree(y_dev);
   }
-  for(int i = 0; i < 15; i++){
-    if((i%5 == 0) && (i != 0)){
-      fprintf(fp_time, "\n");
-    }
-    fprintf(fp_time, "%f %f ",m[i%5], time[i]);
+	//Iteraciones para block_size
+	y = (float*) malloc(sizeof(float)*m[4]);
+	cudaMalloc(&y_dev, sizeof(float)*m[4]);
+	for(j = 0; j < 4; j++){
+		block_size = block_iterate[j];
+		grid_size = (int)ceil((float) m[4] / block_size);
+    cudaEventRecord(ct1);
+		for(int i = 0; i < N ; i++){
+			t = i*delta_t;
+			euler_method_gpu<<<grid_size,block_size>>>(t, y_dev, delta_t, m[4]);
+		}
+		cudaEventRecord(ct2);
+		cudaMemcpy(y, y_dev, m[4]*sizeof(float), cudaMemcpyDeviceToHost);
+		cudaEventSynchronize(ct2);
+		cudaEventElapsedTime(&dt, ct1, ct2);
+		time[10 + j] = dt;
+		printf("Tiempo que demora en GPU = %f [ms] para block_size = %d\n", dt, block_size);
+	}
+	free(y);
+	cudaFree(y_dev);
+  for(int i = 0; i < 14; i++){
+		if((i%5 == 0) && (i != 0)){
+			fprintf(fp_time, "\n");
+		}
+		if(i < 10){
+	    fprintf(fp_time, "%f %f ",m[i%5], time[i]);
+		}
+		else if(i >= 10){
+			fprintf(fp_time, "%d %f ",block_iterate[i%5], time[i]);
+		}
   }
   fclose(fp_time);
   return 0;
